@@ -1,17 +1,22 @@
 import { useContext, useState } from "react";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import {
   loadCaptchaEnginge,
   LoadCanvasTemplate,
-  LoadCanvasTemplateNoReload,
   validateCaptcha,
 } from "react-simple-captcha";
 import { AuthContext } from "../../Provider/AuthProvider";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet";
+import Swal from "sweetalert2";
 const Login = () => {
+  const navigate = useNavigate()
+const location = useLocation()
+const from = location?.state?.from?.pathname || "/"
+
   const {signInUser} = useContext(AuthContext)
   const [disable, setDisable] = useState(true);
-  const captchaRef = useRef(null);
+ 
   useEffect(() => {
     loadCaptchaEnginge(6);
   }, []);
@@ -24,11 +29,16 @@ const Login = () => {
     signInUser(email, password)
     .then(result => {
       const user = result.user
-      console.log(user)
+      Swal.fire({
+        title: "Successful Login!",
+        icon: "success",
+        draggable: true
+      });
     })
+    navigate(from, { replace: true })
   };
-  const handleValidation = () => {
-    const user_captcha_value = captchaRef.current.value;
+  const handleValidation = (e) => {
+    const user_captcha_value =e.target.value;
     if (validateCaptcha(user_captcha_value)) {
       setDisable(false);
     } else {
@@ -36,6 +46,10 @@ const Login = () => {
     }
   };
   return (
+    <>
+    <Helmet>
+        <title>Bistro Boos | Login</title>
+      </Helmet>
     <div className="hero bg-base-200 min-h-screen">
       <div className="hero-content flex-col md:flex-row-reverse">
         <div className="text-center  w-1/2 lg:text-left">
@@ -82,7 +96,7 @@ const Login = () => {
                 <LoadCanvasTemplate />
               </label>
               <input
-                ref={captchaRef}
+                onBlur={handleValidation}
                 type="text"
                 placeholder="type teh text above"
                 name="captcha"
@@ -90,9 +104,7 @@ const Login = () => {
                 required
               />
             </div>
-            <button onClick={handleValidation} className="btn btn-xs">
-              Validation
-            </button>
+          
             <div className="form-control mt-6">
               <input
                 disabled={disable}
@@ -106,6 +118,7 @@ const Login = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
