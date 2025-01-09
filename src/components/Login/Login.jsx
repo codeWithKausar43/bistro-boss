@@ -113,8 +113,10 @@ const from = location?.state?.from?.pathname || "/"
                 value="Login"
               />
             </div>
+            <p className="text-center"><small><Link to="/signUp">Create Account ? SignUp</Link></small></p>
+          <p className="text-center"><small><Link to="/">back to home ? Home</Link></small></p>
           </form>
-          <p><small><Link to="/signUp">Create Account ? SignUp</Link></small></p>
+           
         </div>
       </div>
     </div>

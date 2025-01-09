@@ -3,7 +3,7 @@ import { useForm} from "react-hook-form";
 import { AuthContext } from "../../Provider/AuthProvider";
 import { useContext } from "react";
 import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const SignUp = () => {
 const {createUser,updateUserProfile} = useContext(AuthContext)
@@ -15,7 +15,7 @@ const navigate = useNavigate()
   } = useForm();
 
   const onSubmit = (data) => {
-    console.log(data);
+
     createUser(data.email, data.password)
     .then( result => {
         const loggedUser = result.user 
@@ -114,6 +114,8 @@ const navigate = useNavigate()
             </div>
             <div className="form-control mt-6">
               <button className="btn btn-primary">Login</button>
+              <p className="text-center"><small><Link to="/login">Already have a account? Signin</Link></small></p>
+              <p className="text-center"><small><Link to="/">back to home ? Home</Link></small></p>
             </div>
           </form>
         </div>
