@@ -1,13 +1,15 @@
 import React, {  createContext, useEffect, useState } from 'react';
-import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile } from "firebase/auth";
 import { getAuth } from "firebase/auth";
 import { app } from '../Firebase/firebase_config';
+import userAxiosPublic from '../hooks/userAxiosPublic';
 export const AuthContext = createContext()
 const auth = getAuth(app);
 const AuthProvider = ({children}) => {
 const [user, setUser] = useState(null)
 const [loading, setLoading] = useState(true)
-
+const googleProvider = new GoogleAuthProvider()
+const axiosPublic = userAxiosPublic()
 const createUser = (email, password) => {
     setLoading(true)
   return  createUserWithEmailAndPassword(auth,email,password);
@@ -16,6 +18,11 @@ const createUser = (email, password) => {
 const signInUser = (email, password) => {
     setLoading(true)
   return  signInWithEmailAndPassword(auth, email,password)
+}
+
+const googleSignIn = () => {
+    setLoading(true)
+    return signInWithPopup(auth, googleProvider)
 }
 
 const logOut = () => {
@@ -32,14 +39,24 @@ const updateUserProfile = (name, photo) =>{
 useEffect(()=>{
 const  unSubscribe = onAuthStateChanged(auth, currentUser =>{
     setUser(currentUser)
-    // console.log("current User:", currentUser)
+    if(currentUser){
+        const userInfo = {email : currentUser?.email}
+        axiosPublic.post("/jwt", userInfo)
+        .then(res => {
+            if(res.data.token){
+                localStorage.setItem('access-token', res.data.token)
+            }
+        })
+    }else{
+        localStorage.removeItem('access-token')
+    }
     setLoading(false)
 
 });
 return () => {
  return unSubscribe()
 }
-},[])
+},[axiosPublic])
 
 const userInfo = {
     user,
@@ -47,7 +64,8 @@ const userInfo = {
     createUser,
     signInUser,
     logOut,
-    updateUserProfile
+    updateUserProfile,
+    googleSignIn
 }
     return (
         <AuthContext.Provider value={userInfo}>

@@ -4,8 +4,11 @@ import { AuthContext } from "../../Provider/AuthProvider";
 import { useContext } from "react";
 import Swal from "sweetalert2";
 import { Link, useNavigate } from "react-router-dom";
+import userAxiosPublic from "../../hooks/userAxiosPublic";
+import GoogleLogin from "../../components/SocialLogin/GoogleLogin";
 
 const SignUp = () => {
+  const axiosPublic = userAxiosPublic()
 const {createUser,updateUserProfile} = useContext(AuthContext)
 const navigate = useNavigate()
   const {
@@ -22,13 +25,23 @@ const navigate = useNavigate()
         console.log(loggedUser)
         updateUserProfile(data.name, data.photoURL)
         .then(() => {
-          console.log("user profile info updated")
-          Swal.fire({
-            title: "successful user login ",
-            text: "That thing is still around?",
-            icon: "question"
-          });
-          navigate("/")
+          // console.log("user profile info updated")
+          const userInfo = {
+            name:data.name,
+            email: data.email
+          }
+          axiosPublic.post('/users', userInfo )
+          .then(res => {
+            if(res.data.insertedId){
+              console.log("user added to the database")
+              Swal.fire({
+                title: "successful user login ",
+                text: "That thing is still around?",
+                icon: "question"
+              });
+              navigate("/")
+            }
+          }) 
         })
         .catch(error => console.log(error))
     })
@@ -118,6 +131,7 @@ const navigate = useNavigate()
               <p className="text-center"><small><Link to="/">back to home ? Home</Link></small></p>
             </div>
           </form>
+          <GoogleLogin></GoogleLogin>
         </div>
       </div>
     </div>
